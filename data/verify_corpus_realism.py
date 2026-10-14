@@ -183,7 +183,7 @@ check("唯一正文率 > 80%", uniq / n > 0.80, f"{uniq}/{n} = {uniq / n:.1%}")
 check("账号数 > 40", authors > 40, f"{authors} 个")
 check("平均正文长度 > 40 字", avg_len > 40, f"{avg_len:.1f} 字")
 check("多模态占比 15%~30%", 0.15 < multimodal / n < 0.30, f"{multimodal}/{n} = {multimodal / n:.1%}")
-check("事件数 8", len(data["events"]) == 8, f"{len(data['events'])} 个")
+check("事件数 10", len(data["events"]) == 10, f"{len(data['events'])} 个")
 plat = Counter(p["platform"] for p in posts)
 check("平台分布覆盖 7 个信源", len(plat) == 7,
       "  ".join(f"{k}:{v}" for k, v in plat.most_common()))

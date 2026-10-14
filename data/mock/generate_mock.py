@@ -166,6 +166,10 @@ PLATFORM_BIAS = {
     "ev_g7": {"weibo": 1.3, "wechat": 1.2, "zhihu": 1.25, "forum": 1.15, "douyin": 1.1},
     # ev_g8 理财平台收益争议：合规风险类，社媒/公众号/知乎/头条并重，新闻门户跟进报道
     "ev_g8": {"weibo": 1.3, "wechat": 1.25, "zhihu": 1.3, "toutiao": 1.15, "forum": 1.1, "news": 1.05},
+    # ev_g9 食品质量争议：质量类，社媒/公众号/头条/论坛并重，短视频扩散快
+    "ev_g9": {"weibo": 1.3, "wechat": 1.2, "toutiao": 1.15, "forum": 1.2, "douyin": 1.1},
+    # ev_g10 城市公共服务：公共事件类，社媒/公众号/知乎/头条/新闻并重，论坛讨论政策
+    "ev_g10": {"weibo": 1.3, "wechat": 1.2, "zhihu": 1.2, "toutiao": 1.15, "forum": 1.1, "news": 1.1},
 }
 
 # 平台互动特征（点赞 / 评论 / 转发 的相对系数）
