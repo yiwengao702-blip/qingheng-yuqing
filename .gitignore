@@ -1,0 +1,27 @@
+# ===== 环境与依赖（不上传） =====
+.env
+.env.*
+.venv
+venv
+.env.local
+
+# ===== Python 缓存/构建产物 =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ===== 编辑器/系统 =====
+.vscode/
+.idea/
+.DS_Store
+
+# ===== WorkBuddy 发布工具本地标记（不入库） =====
+.wbapp_*.genie
+applications.yaml
+.workbuddy/
+
+# ===== 备份目录（_release backup，非源码） =====
+_app_relbak/

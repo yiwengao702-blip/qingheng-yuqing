@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>清衡舆情分析平台</title>
+  <link rel="stylesheet" href="/css/style.css?v=20260923aw" />
+  <script src="/vendor/echarts.min.js?v=20260923aw"></script>
+</head>
+<body>
+  <!-- 登录遮罩 -->
+  <div id="login-mask" class="login-mask">
+    <div class="login-card">
+      <aside class="login-aside">
+        <span class="login-badge">在线演示 · Demo</span>
+        <div class="login-brand">
+          <!-- 品牌行：金边渐变方块「鹏」+ 白色品牌字，替代原先孤立的裸文字 logo -->
+          <div class="login-logo">
+            <!-- logo 徽章：深蓝圆形高光底 + 金色芯片（引脚/内芯）+ 底部 V 形托，按用户参考图复刻 -->
+            <span class="logo-mark"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <defs>
+                <radialGradient id="lgChipBase" cx="32%" cy="24%" r="85%">
+                  <stop offset="0%" stop-color="#40679f" />
+                  <stop offset="52%" stop-color="#1d3462" />
+                  <stop offset="100%" stop-color="#0f1e3a" />
+                </radialGradient>
+              </defs>
+              <circle cx="24" cy="24" r="22.5" fill="url(#lgChipBase)" />
+              <circle cx="24" cy="24" r="22.5" stroke="rgba(216,183,101,.4)" stroke-width="1" />
+              <ellipse cx="16.5" cy="11.5" rx="9.5" ry="5.5" fill="rgba(255,255,255,.16)" transform="rotate(-28 16.5 11.5)" />
+              <circle cx="15" cy="8.8" r="1" fill="#d8b765" opacity=".85" />
+              <circle cx="24" cy="7.6" r="1" fill="#d8b765" opacity=".85" />
+              <circle cx="33" cy="8.8" r="1" fill="#d8b765" opacity=".85" />
+              <rect x="17.5" y="16.5" width="13" height="13" rx="2.5" stroke="#dcb96b" stroke-width="2" />
+              <rect x="21.5" y="20.5" width="5" height="5" rx="1" fill="#dcb96b" />
+              <g stroke="#d8b765" stroke-width="1.6" stroke-linecap="round">
+                <line x1="20.5" y1="16.5" x2="20.5" y2="13.8" />
+                <line x1="24" y1="16.5" x2="24" y2="13.8" />
+                <line x1="27.5" y1="16.5" x2="27.5" y2="13.8" />
+                <line x1="20.5" y1="29.5" x2="20.5" y2="32.2" />
+                <line x1="24" y1="29.5" x2="24" y2="32.2" />
+                <line x1="27.5" y1="29.5" x2="27.5" y2="32.2" />
+                <line x1="17.5" y1="21" x2="14.8" y2="21" />
+                <line x1="17.5" y1="25" x2="14.8" y2="25" />
+                <line x1="30.5" y1="21" x2="33.2" y2="21" />
+                <line x1="30.5" y1="25" x2="33.2" y2="25" />
+              </g>
+              <path d="M17.5 35 l6.5 4.6 l6.5 -4.6" stroke="#dcb96b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg></span>
+            <span class="logo-text">清衡舆情</span>
+          </div>
+        </div>
+        <h1 class="login-hero">智能分析平台</h1>
+        <p class="login-intro">
+          面向企业品牌与公共事件的智能舆情系统：全网多源监测，情感风险研判，处置协同与一键报告导出闭环。
+        </p>
+        <ul class="login-feats">
+          <li><span class="fi fi-01">①</span>全网多源 · 情感风险研判</li>
+          <li><span class="fi fi-02">②</span>处置协同闭环</li>
+          <li><span class="fi fi-03">③</span>一键报告导出</li>
+        </ul>
+        <p class="login-note">系统输出仅为辅助研判参考，最终结论需经人工核实，不构成正式决策依据。</p>
+      </aside>
+      <div class="login-main">
+        <!-- 登录视图 -->
+        <div id="login-view">
+          <div class="login-form-head">
+            <h2>账号登录</h2>
+            <p>请使用演示账号登录，三种角色权限不同</p>
+          </div>
+          <div class="login-field">
+            <span class="fi fi-user"></span>
+            <input id="login-user" placeholder="用户名" autocomplete="username" />
+          </div>
+          <div class="login-field">
+            <span class="fi fi-lock"></span>
+            <input id="login-pass" type="password" placeholder="密码" autocomplete="current-password" />
+          </div>
+          <label class="login-remember"><input type="checkbox" id="login-remember" /> 记住账号密码</label>
+          <button id="login-btn" class="primary">登 录</button>
+          <div id="login-err" class="err"></div>
+
+          <div class="login-acc-title">
+            <span>演示账号（点击自动填充）</span>
+          </div>
+          <div class="login-accounts" id="login-accounts">
+            <button data-u="admin" data-p="admin123">
+              <b>系统管理员</b><i>admin</i><span class="pwd">admin123</span>
+            </button>
+            <button data-u="analyst" data-p="analyst123">
+              <b>舆情分析师</b><i>analyst</i><span class="pwd">analyst123</span>
+            </button>
+            <button data-u="pr" data-p="pr123">
+              <b>公关运营</b><i>pr</i><span class="pwd">pr123</span>
+            </button>
+          </div>
+
+          <div class="hint">还没有账号？<a id="to-register" class="link">立即注册</a></div>
+        </div>
+        <!-- 注册视图 -->
+        <div id="register-view" class="hidden">
+          <div class="login-form-head">
+            <h2>注册账号</h2>
+            <p>注册后自动登录，可直接体验系统</p>
+          </div>
+          <input id="reg-user" placeholder="用户名（3-20位字母/数字/下划线）" autocomplete="username" />
+          <input id="reg-name" placeholder="显示姓名（选填，如：张分析）" />
+          <input id="reg-pass" type="password" placeholder="密码（至少6位）" autocomplete="new-password" />
+          <input id="reg-pass2" type="password" placeholder="确认密码" autocomplete="new-password" />
+          <select id="reg-role">
+            <option value="analyst">舆情分析师</option>
+            <option value="pr">公关运营人员</option>
+            <option value="admin">系统管理员</option>
+          </select>
+          <button id="reg-btn" class="primary">注 册</button>
+          <div id="reg-err" class="err"></div>
+          <div class="hint">已有账号？<a id="to-login" class="link">返回登录</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 侧边栏 + 主内容区（ID 保持 topbar/page，JS 零改动） -->
+  <div id="topbar" class="layout hidden">
+    <aside class="sidebar">
+        <div class="side-brand">
+          <span class="brand-mark">
+            <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" width="38" height="38">
+              <defs>
+                <radialGradient id="smChipBase" cx="32%" cy="24%" r="85%">
+                  <stop offset="0%" stop-color="#40679f" />
+                  <stop offset="52%" stop-color="#1d3462" />
+                  <stop offset="100%" stop-color="#0f1e3a" />
+                </radialGradient>
+              </defs>
+              <circle cx="24" cy="24" r="22.5" fill="url(#smChipBase)" />
+              <circle cx="24" cy="24" r="22.5" stroke="rgba(216,183,101,.45)" stroke-width="1.2" />
+              <ellipse cx="16" cy="11" rx="9" ry="5" fill="rgba(255,255,255,.15)" transform="rotate(-28 16 11)" />
+              <circle cx="14" cy="8.5" r="1.1" fill="#d8b765" opacity=".9" />
+              <circle cx="24" cy="7.2" r="1.1" fill="#d8b765" opacity=".9" />
+              <circle cx="34" cy="8.5" r="1.1" fill="#d8b765" opacity=".9" />
+              <rect x="17" y="16" width="14" height="14" rx="2.5" stroke="#dcb96b" stroke-width="2.2" />
+              <rect x="21.5" y="20.5" width="5" height="5" rx="1" fill="#dcb96b" />
+              <g stroke="#d8b765" stroke-width="1.8" stroke-linecap="round">
+                <line x1="20" y1="16" x2="20" y2="12.5" />
+                <line x1="24" y1="16" x2="24" y2="12.5" />
+                <line x1="28" y1="16" x2="28" y2="12.5" />
+                <line x1="20" y1="30" x2="20" y2="33.5" />
+                <line x1="24" y1="30" x2="24" y2="33.5" />
+                <line x1="28" y1="30" x2="28" y2="33.5" />
+                <line x1="17" y1="20.5" x2="13.5" y2="20.5" />
+                <line x1="17" y1="25" x2="13.5" y2="25" />
+                <line x1="31" y1="20.5" x2="34.5" y2="20.5" />
+                <line x1="31" y1="25" x2="34.5" y2="25" />
+              </g>
+              <path d="M17 35.5 l7 5 l7 -5" stroke="#dcb96b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <div class="brand-text">
+          <b>清衡舆情分析平台</b>
+          <i>企业品牌与公共事件舆情监测</i>
+        </div>
+      </div>
+      <nav id="nav"></nav>
+      <div class="side-user">
+        <span id="user-name"></span>
+        <span id="user-role" class="role-tag"></span>
+        <button id="logout-btn">退出登录</button>
+      </div>
+    </aside>
+    <main id="page" class="page hidden"></main>
+  </div>
+
+  <!-- 通用确认弹窗（退出确认等） -->
+  <div id="confirm-mask" class="confirm-mask hidden">
+    <div class="confirm-card">
+      <div class="confirm-head">
+        <span class="confirm-ico">!</span>
+        <h3 id="confirm-title">提示</h3>
+      </div>
+      <p id="confirm-msg" class="confirm-msg"></p>
+      <div class="confirm-actions">
+        <button id="confirm-cancel" class="btn ghost">取消</button>
+        <button id="confirm-ok" class="btn">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js?v=20260923aw"></script>
+  <script src="/js/store.js?v=20260923aw"></script>
+  <script src="/js/dashboard.js?v=20260923aw"></script>
+  <script src="/js/industry_board.js?v=20260923ax"></script>
+  <script src="/js/feed.js?v=20260923aw"></script>
+  <script src="/js/event.js?v=20260923aw"></script>
+  <script src="/js/disposal.js?v=20260923aw"></script>
+  <script src="/js/report.js?v=20260923aw"></script>
+  <script src="/js/config.js?v=20260923aw"></script>
+  <script src="/js/online.js?v=20260923aw"></script>
+  <script src="/js/app.js?v=20260923ax"></script>
+</body>
+</html>
