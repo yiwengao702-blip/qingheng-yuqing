@@ -7,6 +7,9 @@ const Dashboard = (() => {
       <h2>舆情态势大盘</h2>
       <div class="desc">全网多源舆情实时态势感知 · 数据每访问刷新一次，预警通过下方滚动列表实时推送</div>
       <div class="grid cols-4" id="metrics"></div>
+      <div class="grid cols-1" style="margin-top:16px">
+        <div class="card"><h3><span class="dot"></span>在监测事件一览（点击进入研判工作台）</h3><div id="ev-chips" class="loading">加载中…</div></div>
+      </div>
       <div class="grid cols-2" style="margin-top:16px">
         <div class="card"><h3><span class="dot"></span>全网舆情声量趋势（小时）</h3><div id="trend" class="chart"></div></div>
         <div class="card"><h3><span class="dot"></span>情感倾向分布</h3><div id="sentiment" class="chart sm"></div></div>
@@ -29,6 +32,10 @@ const Dashboard = (() => {
       return;
     }
 
+    // 一并拉取事件列表，用于「在监测事件一览」快捷入口（与大盘聚合解耦，互不影响）
+    let evList = { events: [] };
+    try { evList = await API.get("/api/events"); } catch (e) {}
+
     // 指标卡
     document.getElementById("metrics").innerHTML = [
       { n: ov.total_volume, l: "监测总声量（去重）" },
@@ -36,6 +43,25 @@ const Dashboard = (() => {
       { n: ov.alert_count, l: "活跃预警" },
       { n: ov.dedup.duplicates, l: "SimHash 去重命中" },
     ].map((m) => `<div class="card metric"><div class="num">${m.n}</div><div class="lbl">${m.l}</div></div>`).join("");
+
+    // 在监测事件一览：按风险等级排序的可点击标签，点击直达研判工作台
+    const chipsBox = document.getElementById("ev-chips");
+    const allEvents = (evList.events || []).slice();
+    const GRADE_ORDER = { S: 0, A: 1, B: 2, C: 3 };
+    allEvents.sort((a, b) => ((GRADE_ORDER[a.grade] ?? 9) - (GRADE_ORDER[b.grade] ?? 9)));
+    if (chipsBox) {
+      chipsBox.className = "ev-chips";
+      if (allEvents.length) {
+        chipsBox.innerHTML = allEvents.map((e) =>
+          `<span class="tag tag-${e.grade} ev-chip" data-id="${e.event_id}" title="${esc(e.title)}">${e.grade} · ${esc(e.title)}</span>`
+        ).join("");
+        chipsBox.querySelectorAll(".ev-chip").forEach((el) => {
+          el.onclick = () => { window._feedPendingEventId = el.dataset.id; App.go("event"); };
+        });
+      } else {
+        chipsBox.innerHTML = `<div class="note">暂无在监测事件</div>`;
+      }
+    }
 
     // 声量趋势
     const trend = ov.trend || [];
