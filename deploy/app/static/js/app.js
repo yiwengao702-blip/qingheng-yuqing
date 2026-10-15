@@ -170,14 +170,6 @@ const App = (() => {
       doLogin(u, p);
     };
     document.getElementById("login-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("login-btn").click(); });
-    document.querySelectorAll(".login-accounts button").forEach((b) => {
-      b.onclick = () => {
-        // 仅填充用户名（口令由环境变量指定 / 启动期随机生成，前端无从得知），用户自行输入密码后点登录
-        document.getElementById("login-user").value = b.dataset.u;
-        document.getElementById("login-pass").value = "";
-        document.getElementById("login-pass").focus();
-      };
-    });
     // 退出登录：先弹确认框，确认后再清会话并回到登录页
     document.getElementById("logout-btn").onclick = async () => {
       const ok = await askConfirm({ title: "退出登录", message: "确定要退出当前账号吗？退出后需重新登录。", okText: "退出登录", cancelText: "再想想" });
