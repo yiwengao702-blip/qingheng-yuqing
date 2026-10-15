@@ -1,5 +1,8 @@
 # 鹏城舆情分析平台 —— 后端依赖
 # 安装: 在 backend 目录执行  python -m venv .venv && .venv/Scripts/activate && pip install -r requirements.txt
+# 注意：JWT 签发/校验依赖仓库外的共享底座 sakura_base（非 PyPI 包），需另行可编辑安装：
+#   pip install -e "<sakura_platform>/packages/sakura_base[web]"
+# 未安装时后端启动会报 ImportError 并提示上述安装命令。
 fastapi>=0.110
 uvicorn[standard]>=0.29
 python-multipart>=0.0.9
