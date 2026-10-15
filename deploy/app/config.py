@@ -3,9 +3,23 @@
 from __future__ import annotations
 
 import os
+import secrets
+import logging
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import List
+
+_logger = logging.getLogger(__name__)
+
+
+def _generate_ephemeral_secret() -> str:
+    """SECRET_KEY 未设置时生成临时随机密钥（仅单实例演示，重启失效）。"""
+    key = secrets.token_hex(32)
+    _logger.warning(
+        "SECRET_KEY 未设置，已生成临时随机密钥（仅适用于单实例演示，进程重启后旧令牌失效）。"
+        "多副本生产部署请通过环境变量 SECRET_KEY 注入同一把强密钥。"
+    )
+    return key
 
 
 # ---------------------------------------------------------------------------
@@ -56,10 +70,12 @@ class Settings:
     debug: bool = field(default_factory=lambda: os.getenv("DEBUG", "false").lower() == "true")
 
     # ----- 安全与鉴权 -----
-    # 注意：线上以多副本方式部署时，各副本必须使用「同一把」签名密钥，否则
-    # A 副本签发的令牌在 B 副本校验会报「令牌签名无效」。因此这里使用固定常量，
-    # 不读取 SECRET_KEY 环境变量（部分托管平台会按实例随机注入，导致跨副本令牌失效）。
-    secret_key: str = "pcxx-yuqing-platform-fixed-secret-2026-do-not-rotate"
+    # 安全修复（P0 硬编码密钥）：原密钥写死在源码里，拿到源码即可伪造任意令牌。
+    # 现改为「优先读环境变量 SECRET_KEY；未设置时生成临时随机密钥（仅单实例演示，重启失效），
+    # 并在日志高亮告警」。多副本生产部署请通过环境变量 SECRET_KEY 注入同一把强密钥。
+    secret_key: str = field(
+        default_factory=lambda: os.getenv("SECRET_KEY") or _generate_ephemeral_secret()
+    )
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = field(
         default_factory=lambda: int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "525600"))
@@ -105,10 +121,19 @@ class Settings:
     )
 
     def validate(self) -> None:
-        """启动校验：数据集文件必须存在。"""
+        """启动校验：数据集文件必须存在，且 SECRET_KEY 不得过短或为已知弱密钥。"""
         if not os.path.isfile(self.dataset_path):
             raise RuntimeError(
                 f"数据集文件不存在: {self.dataset_path}，请先运行 data/mock/generate_mock.py 生成。"
+            )
+        # 安全：拒绝过短或为已知弱密钥的 SECRET_KEY
+        if self.secret_key in (
+            "", "pcxx-yuqing-platform-fixed-secret-2026-do-not-rotate",
+            "changeme", "secret",
+        ) or len(self.secret_key) < 16:
+            raise RuntimeError(
+                "SECRET_KEY 过短或为已知弱密钥（至少 16 位）；"
+                "多副本生产部署请通过环境变量 SECRET_KEY 注入同一把强密钥。"
             )
 
 
