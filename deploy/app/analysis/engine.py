@@ -381,4 +381,4 @@ if __name__ == "__main__":
     # 统一从服务入口启动：cd D:/Public Opinion/deploy 后执行 python run.py
     print("【提示】engine.py 是 app 包的内部模块，不能直接运行。")
     print("正确启动方式：cd D:/Public Opinion/deploy 后执行  python run.py")
-    print("启动后本地预览：http://127.0.0.1:8001/  （账号 admin/admin123）")
+    print("启动后本地预览：http://127.0.0.1:8001/  （账号 admin；口令由 ADMIN_PASSWORD 环境变量指定，未设置则启动期随机生成并打印于后端日志）")
