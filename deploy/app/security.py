@@ -18,6 +18,16 @@ from app.config import settings
 from app.errors import AuthError, PermissionDeniedError
 from app.online_registry import ensure_registered
 
+# [融合] 统一走 sakura_base.auth.jwt 做 HS256 签发/校验，消除自实现漂移（四项目共用单源）。
+try:
+    from sakura_base.auth import jwt as base_jwt
+except ImportError as _imp_err:  # 提示先安装共享底座
+    raise RuntimeError(
+        "Public Opinion 现已依赖 sakura_base 共享底座，请先安装：\n"
+        "  pip install -e <sakura_platform>/packages/sakura_base[web]\n"
+        f"原始错误：{_imp_err}"
+    ) from _imp_err
+
 _bearer = HTTPBearer(auto_error=False)
 
 # 吊销的令牌集合（被管理员「删除/踢出」的账号令牌会加入，下次请求即 401）
@@ -48,7 +58,7 @@ def verify_password(password: str, stored: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# 自实现 JWT（HS256）
+# 令牌签发/校验：收敛到 sakura_base.auth.jwt（HS256）
 # ---------------------------------------------------------------------------
 def _b64url_encode(raw: bytes) -> str:
     return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
@@ -59,39 +69,22 @@ def _b64url_decode(raw: str) -> bytes:
     return base64.urlsafe_b64decode(raw + padding)
 
 
-def _sign(header_b64: str, payload_b64: str) -> str:
-    signing_input = f"{header_b64}.{payload_b64}".encode("utf-8")
-    sig = hmac.new(settings.secret_key.encode("utf-8"), signing_input, hashlib.sha256).digest()
-    return _b64url_encode(sig)
-
-
 def create_access_token(username: str, role: str, name: str, permissions: List[str],
                         expires_minutes: Optional[int] = None) -> str:
     exp = int(time.time()) + (expires_minutes or settings.access_token_expire_minutes) * 60
-    header = {"alg": "HS256", "typ": "JWT"}
     # 注意：JWT 载荷中的权限键必须为 "permissions"，
     # 与 require_permissions() 读取的键保持一致（曾误用 "perms" 导致所有鉴权 403）。
     payload = {"sub": username, "role": role, "name": name,
                "permissions": permissions, "exp": exp}
-    h = _b64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8"))
-    p = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
-    s = _sign(h, p)
-    return f"{h}.{p}.{s}"
+    # [融合] 统一走底座 HS256 实现；签名密钥仍为 settings.secret_key（格式完全兼容，旧令牌可验）
+    return base_jwt.encode_jwt(payload, settings.secret_key, expires_in=exp - int(time.time()))
 
 
 def decode_token(token: str) -> dict:
-    try:
-        h, p, s = token.split(".", 2)
-    except ValueError:
-        raise AuthError("令牌格式无效")
-    if not hmac.compare_digest(_sign(h, p), s):
-        raise AuthError("令牌签名无效")
-    try:
-        payload = json.loads(_b64url_decode(p).decode("utf-8"))
-    except Exception:
-        raise AuthError("令牌载荷解析失败")
-    if payload.get("exp", 0) < int(time.time()):
-        raise AuthError("令牌已过期")
+    # [融合] 统一走底座实现；校验失败（格式/签名/过期）返回 None 时按原语义抛 AuthError
+    payload = base_jwt.decode_jwt(token, settings.secret_key, verify_exp=True)
+    if payload is None:
+        raise AuthError("令牌无效或已过期")
     return payload
 
 
