@@ -120,8 +120,13 @@ class UserStore:
 
     # ----- 注册 -----
     def create(self, username: str, password: str, role: str,
-               name: Optional[str] = None) -> dict:
-        """创建账号；校验失败抛 ValueError（由路由层转为 400）。"""
+               name: Optional[str] = None, allow_admin: bool = False) -> dict:
+        """创建账号；校验失败抛 ValueError（由路由层转为 400）。
+
+        安全修复（P0 越权注册）：开放注册接口(/auth/register)严禁自选 admin 角色，
+        否则任意访客可自注册为管理员拿到全部权限。admin 只能由种子账号提供，
+        或后续接入独立的管理员创建接口并显式传 allow_admin=True。
+        """
         username = (username or "").strip()
         role = (role or "").strip()
         name = (name or "").strip() or username
@@ -131,6 +136,9 @@ class UserStore:
             raise ValueError(f"密码长度至少 {_MIN_PASSWORD_LEN} 位")
         if role not in ROLE_PERMISSIONS:
             raise ValueError("角色不合法，可选：analyst / pr / admin")
+        # 安全：禁止通过开放注册成为管理员
+        if role == "admin" and not allow_admin:
+            raise ValueError("不允许通过开放注册创建管理员账号")
         with self._lock:
             if username in self._users:
                 raise ValueError("该用户名已被注册")
