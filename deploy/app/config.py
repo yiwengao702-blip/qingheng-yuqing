@@ -45,13 +45,28 @@ ROLE_PERMISSIONS: dict[str, List[str]] = {
 }
 
 # 演示态默认账号（仅用于本地演示，生产请通过环境变量覆盖并接入真实用户库）。
-# 真实口令不得写入代码库；此处为可一键替换的演示种子。
+# 安全：不再硬编码弱默认口令(admin123 等)。优先读环境变量 ADMIN_PASSWORD / ANALYST_PASSWORD /
+# PR_PASSWORD；若未设置，则启动期为该账号生成一次性随机强口令并打印到启动日志（见 main.py 生命周期），
+# 避免「克隆即弱口令」。自动生成的口令仅本次启动有效（种子账号不落盘），重启且未设环境变量会重新生成。
+AUTO_SEED_PASSWORDS: dict[str, str] = {}  # 仅记录本次启动自动生成的口令，供启动日志提示（进程内存，不落盘）
+
+
+def _resolve_seed_password(username: str, env_var: str) -> str:
+    """种子账号口令解析：环境变量优先；未设置则生成随机强口令（记录到 AUTO_SEED_PASSWORDS）。"""
+    env_val = os.getenv(env_var)
+    if env_val:
+        return env_val
+    pw = secrets.token_urlsafe(16)
+    AUTO_SEED_PASSWORDS[username] = pw
+    return pw
+
+
 SEED_USERS: List[dict] = [
-    {"username": "admin", "password": os.getenv("ADMIN_PASSWORD", "admin123"),
+    {"username": "admin", "password": _resolve_seed_password("admin", "ADMIN_PASSWORD"),
      "role": "admin", "name": "系统管理员"},
-    {"username": "analyst", "password": os.getenv("ANALYST_PASSWORD", "analyst123"),
+    {"username": "analyst", "password": _resolve_seed_password("analyst", "ANALYST_PASSWORD"),
      "role": "analyst", "name": "舆情分析师"},
-    {"username": "pr", "password": os.getenv("PR_PASSWORD", "pr123"),
+    {"username": "pr", "password": _resolve_seed_password("pr", "PR_PASSWORD"),
      "role": "pr", "name": "公关运营"},
 ]
 
