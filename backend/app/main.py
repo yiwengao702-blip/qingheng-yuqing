@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.analysis.engine import get_engine
 from app.api.routes import router
-from app.config import settings
+from app.config import settings, AUTO_SEED_PASSWORDS
 from app.errors import register_exception_handlers
 from app.logging_utils import set_request_id, setup_logging
 
@@ -31,6 +31,14 @@ async def lifespan(app: FastAPI):
     yield 之后的停机阶段：当前无持久连接需要清理，预留扩展位。
     """
     settings.validate()
+    # 若种子账号口令未在环境变量中指定，启动期已生成随机强口令；此处打印提示，避免「克隆即弱口令」。
+    if AUTO_SEED_PASSWORDS:
+        logger.warning(
+            "以下种子账号本次启动使用了自动生成的随机口令（未在环境变量中指定 ADMIN_PASSWORD / "
+            "ANALYST_PASSWORD / PR_PASSWORD）：%s。请尽快登录后在「系统配置」中修改，"
+            "或停机通过环境变量指定固定口令，以保证重启后仍可用。",
+            "；".join(f"{u}={p}" for u, p in AUTO_SEED_PASSWORDS.items()),
+        )
     get_engine()
     logger.info("分析引擎预热完成，服务就绪")
     yield
