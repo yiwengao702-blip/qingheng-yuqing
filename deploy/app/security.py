@@ -1,9 +1,8 @@
 # 文件位置: backend/app/security.py
-# 功能: 鉴权与 RBAC。自实现 HS256 JWT（基于 hmac，无第三方依赖）+ pbkdf2 口令哈希。
-#       令牌默认有效期 1 年（config.access_token_expire_minutes=525600）。
+# 功能: 鉴权与 RBAC。HS256 JWT（基于 hmac，无第三方依赖，实现见 app/sakura_jwt.py 内联副本）
+#       + pbkdf2 口令哈希。令牌默认有效期 1 年（config.access_token_expire_minutes=525600）。
 from __future__ import annotations
 
-import base64
 import hashlib
 import hmac
 import json
@@ -18,15 +17,9 @@ from app.config import settings
 from app.errors import AuthError, PermissionDeniedError
 from app.online_registry import ensure_registered
 
-# [融合] 统一走 sakura_base.auth.jwt 做 HS256 签发/校验，消除自实现漂移（四项目共用单源）。
-try:
-    from sakura_base.auth import jwt as base_jwt
-except ImportError as _imp_err:  # 提示先安装共享底座
-    raise RuntimeError(
-        "Public Opinion 现已依赖 sakura_base 共享底座，请先安装：\n"
-        "  pip install -e <sakura_platform>/packages/sakura_base[web]\n"
-        f"原始错误：{_imp_err}"
-    ) from _imp_err
+# [本地化] HS256 签发/校验收敛到 app/sakura_jwt.py（sakura_base.auth.jwt 的内联副本，
+# 纯标准库零三方依赖）。这样发布版 clone-and-run，不再依赖仓库外的私有共享底座。
+from app.sakura_jwt import encode_jwt, decode_jwt
 
 _bearer = HTTPBearer(auto_error=False)
 
@@ -58,17 +51,8 @@ def verify_password(password: str, stored: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# 令牌签发/校验：收敛到 sakura_base.auth.jwt（HS256）
+# 令牌签发/校验：本地内联 HS256（app/sakura_jwt.py）
 # ---------------------------------------------------------------------------
-def _b64url_encode(raw: bytes) -> str:
-    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
-
-
-def _b64url_decode(raw: str) -> bytes:
-    padding = "=" * (-len(raw) % 4)
-    return base64.urlsafe_b64decode(raw + padding)
-
-
 def create_access_token(username: str, role: str, name: str, permissions: List[str],
                         expires_minutes: Optional[int] = None) -> str:
     exp = int(time.time()) + (expires_minutes or settings.access_token_expire_minutes) * 60
@@ -76,13 +60,13 @@ def create_access_token(username: str, role: str, name: str, permissions: List[s
     # 与 require_permissions() 读取的键保持一致（曾误用 "perms" 导致所有鉴权 403）。
     payload = {"sub": username, "role": role, "name": name,
                "permissions": permissions, "exp": exp}
-    # [融合] 统一走底座 HS256 实现；签名密钥仍为 settings.secret_key（格式完全兼容，旧令牌可验）
-    return base_jwt.encode_jwt(payload, settings.secret_key, expires_in=exp - int(time.time()))
+    # 走内联的 HS256 实现；签名密钥为 settings.secret_key（格式与 sakura_base 完全兼容，旧令牌可验）
+    return encode_jwt(payload, settings.secret_key, expires_in=exp - int(time.time()))
 
 
 def decode_token(token: str) -> dict:
-    # [融合] 统一走底座实现；校验失败（格式/签名/过期）返回 None 时按原语义抛 AuthError
-    payload = base_jwt.decode_jwt(token, settings.secret_key, verify_exp=True)
+    # 走内联实现；校验失败（格式/签名/过期）返回 None 时按原语义抛 AuthError
+    payload = decode_jwt(token, settings.secret_key, verify_exp=True)
     if payload is None:
         raise AuthError("令牌无效或已过期")
     return payload
