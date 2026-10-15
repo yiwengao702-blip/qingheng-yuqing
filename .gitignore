@@ -1,9 +1,12 @@
 # ===== 环境与依赖（不上传） =====
 .env
 .env.*
+.env.local
+# 例外：.env.example 是配置模板（仅占位值，无真实密钥），应随仓库发布以便部署参考
+!.env.example
+!backend/.env.example
 .venv
 venv
-.env.local
 
 # ===== Python 缓存/构建产物 =====
 __pycache__/
