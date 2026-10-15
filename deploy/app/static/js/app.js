@@ -172,9 +172,10 @@ const App = (() => {
     document.getElementById("login-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("login-btn").click(); });
     document.querySelectorAll(".login-accounts button").forEach((b) => {
       b.onclick = () => {
+        // 仅填充用户名（口令由环境变量指定 / 启动期随机生成，前端无从得知），用户自行输入密码后点登录
         document.getElementById("login-user").value = b.dataset.u;
-        document.getElementById("login-pass").value = b.dataset.p;
-        doLogin(b.dataset.u, b.dataset.p);
+        document.getElementById("login-pass").value = "";
+        document.getElementById("login-pass").focus();
       };
     });
     // 退出登录：先弹确认框，确认后再清会话并回到登录页
@@ -192,21 +193,6 @@ const App = (() => {
     ["reg-user", "reg-name", "reg-pass", "reg-pass2"].forEach((id) => {
       document.getElementById(id).addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("reg-btn").click(); });
     });
-    // 一键填充：点任意演示账号卡 → 自动填入用户名/密码并直接登录（旧逻辑保留）
-    // 账号卡的 <span class="pwd"> 里保留的是显示密码，点击可复制
-    const accs = document.getElementById("login-accounts");
-    if (accs) {
-      accs.addEventListener("click", async (e) => {
-        const pwd = e.target.closest(".pwd");
-        if (pwd && e.target.closest(".login-accounts")) {
-          const card = e.target.closest("button");
-          if (card) {
-            document.getElementById("login-user").value = card.dataset.u;
-            document.getElementById("login-pass").value = card.dataset.p;
-          }
-        }
-      });
-    }
   }
 
   async function init() {
