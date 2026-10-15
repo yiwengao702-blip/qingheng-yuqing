@@ -8,7 +8,7 @@
 
 ## 一、技术栈
 
-- 后端：Python 3.13 · FastAPI · SSE（流式预警）· 自实现 HS256 JWT（零额外依赖）· RBAC
+- 后端：Python 3.13 · FastAPI · SSE（流式预警）· JWT 由 sakura_base 共享底座签发/校验（HS256）· RBAC
 - 分析：jieba 分词 · SimHash 去重 · 情感/细粒度情绪 · Jaccard 观点聚类 · 传播父子链 · 实体共现图谱 · 烈度指数 S/A/B/C 分级
 - 前端：原生 HTML/JS · 内置 ECharts（离线可跑，无需 CDN）· 内存令牌（不落 localStorage）
 - 导出：reportlab 中文 PDF · Markdown · HTML
@@ -23,7 +23,7 @@ Public Opinion/
 │  ├─ app/
 │  │  ├─ main.py               # FastAPI 应用工厂（中间件/静态挂载/预热）
 │  │  ├─ config.py             # 集中配置 + RBAC 权限矩阵 + 种子账号
-│  │  ├─ security.py           # 自实现 JWT + pbkdf2 口令哈希 + RBAC 依赖
+│  │  ├─ security.py           # JWT 走 sakura_base（HS256）+ pbkdf2 口令哈希 + RBAC 依赖
 │  │  ├─ errors.py             # 规范化异常（{error:{code,message,request_id}}）
 │  │  ├─ logging_utils.py      # 结构化 JSON 日志 + 请求 ID
 │  │  ├─ models.py             # Pydantic 模型
@@ -56,6 +56,9 @@ python -m venv .venv
 .venv\Scripts\activate
 # 安装依赖（fastapi / uvicorn / jieba / reportlab / pydantic）
 pip install -r requirements.txt
+# 安装鉴权共享底座 sakura_base（本项目的 JWT 由该包签发/校验；为仓库外独立包，需可编辑安装）
+# 路径请替换为你的 sakura_platform 仓库位置：
+pip install -e "<sakura_platform>/packages/sakura_base[web]"
 ```
 
 ### 2. （可选）重新生成模拟数据集
@@ -87,6 +90,8 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info
 
 启动后控制台出现 `分析引擎预热完成，服务就绪` 即表示数据已加载并计算完成。
 
+> 安全配置：复制 `backend/.env.example` 为 `backend/.env` 并至少设置 `SECRET_KEY`（生产必填强随机值，可用 `python -c "import secrets;print(secrets.token_hex(32))"` 生成）；`ADMIN_PASSWORD` 等可选项用于固定演示账号口令。未设置 `SECRET_KEY` 时平台生成临时随机密钥（仅单实例演示、重启后旧令牌失效），生产务必设置固定强密钥。
+
 ### 4. 打开前端
 
 浏览器访问 **http://localhost:8000** ，自动加载态势大盘，并使用下方演示账号登录。
@@ -97,13 +102,19 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info
 
 ## 四、演示账号（RBAC 三角色）
 
-| 角色 | 账号 | 口令 | 权限范围 |
-| --- | --- | --- | --- |
-| 系统管理员 | `admin` | `admin123` | 全部：信源/阈值/通知配置、监测主题、研判、报告、预警、处置、公关 |
-| 舆情分析师 | `analyst` | `analyst123` | 监测主题、查阅舆情、事件研判、生成/导出报告 |
-| 公关运营人员 | `pr` | `pr123` | 接收预警、查看传播/观点、采纳公关建议、流转工单 |
+平台内置三个种子账号 `admin` / `analyst` / `pr`，其口令按以下规则确定：
 
-> 生产环境请通过环境变量 `ADMIN_PASSWORD` 等覆盖口令，并接入真实用户库。
+- **若设置了环境变量** `ADMIN_PASSWORD` / `ANALYST_PASSWORD` / `PR_PASSWORD`，则使用该值；
+- **若未设置**，启动期为每个账号生成一次性随机强口令，并打印到启动日志（形如 `以下种子账号本次启动使用了自动生成的随机口令：admin=xxxx；analyst=yyyy；pr=zzzz`）。
+
+> 首次部署且未设环境变量时，请查看后端启动日志获取本次随机口令；登录后建议在「系统配置」中修改为固定口令，或停机通过环境变量指定固定口令以保证重启后仍可用。
+> 下方为「设置了对应环境变量」时的口令示例；**生产环境务必通过环境变量覆盖为强口令，或接入真实用户库**。
+
+| 角色 | 账号 | 口令（仅当设置了对应环境变量时生效） | 权限范围 |
+| --- | --- | --- | --- |
+| 系统管理员 | `admin` | 由 `ADMIN_PASSWORD` 指定（如 `admin123`） | 全部：信源/阈值/通知配置、监测主题、研判、报告、预警、处置、公关 |
+| 舆情分析师 | `analyst` | 由 `ANALYST_PASSWORD` 指定（如 `analyst123`） | 监测主题、查阅舆情、事件研判、生成/导出报告 |
+| 公关运营人员 | `pr` | 由 `PR_PASSWORD` 指定（如 `pr123`） | 接收预警、查看传播/观点、采纳公关建议、流转工单 |
 
 ---
 
@@ -145,5 +156,5 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info
 
 - **LLM 层**：当前为离线模拟叙事与公关话术，设置 `USE_MOCK_LLM=false` 并配置 `LLM_API_KEY/LLM_BASE_URL/LLM_MODEL` 即可接入真实大模型（契约不变）。
 - **多模态**：OCR/ASR 为模拟样本，接入真实服务时替换 `data/multimodal.py` 中解析函数即可。
-- **鉴权**：演示态使用自实现 HS256 JWT；生产建议接入企业统一身份认证并妥善保管 `SECRET_KEY`。
+- **鉴权**：JWT 由 sakura_base 共享底座签发/校验（HS256）；`SECRET_KEY` 通过环境变量注入，未设置时启动期生成临时随机密钥（仅单实例演示、重启失效），生产务必设置固定强密钥。建议生产接入企业统一身份认证。
 - **持久化**：监测配置/处置状态落盘于 `backend/app/data/config_state.json`（JSON），生产可替换为数据库。
