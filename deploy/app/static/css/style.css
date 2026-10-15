@@ -114,7 +114,7 @@ body {
 .login-main { flex: 1; padding: 44px 44px; display: flex; flex-direction: column; justify-content: center; background: #fff; }
 .login-form-head { margin-bottom: 22px; }
 .login-form-head h2 { font-size: 22px; font-weight: 700; color: var(--navy); letter-spacing: .5px; }
-.login-form-head p { color: var(--muted); font-size: 12.5px; margin-top: 7px; }
+.login-form-head p { color: var(--muted); font-size: 13px; margin-top: 7px; }
 .login-field { position: relative; margin-bottom: 14px; }
 .login-field .fi-user, .login-field .fi-lock {
   position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
@@ -136,6 +136,7 @@ body {
   width: 100%; padding: 13px 14px 13px 40px; border: 1px solid var(--line); border-radius: 10px;
   font-size: 14px; background: #fafbfd; transition: .18s;
 }
+.login-field input:hover:not(:focus) { border-color: #c9d6e6; }
 .login-field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(35, 74, 130, .13); background: #fff; }
 /* 登录按钮：亮蓝色（区别于品牌深蓝，对齐参考图观感） */
 /* 记住账号密码（独占一行，在登录按钮上方）+ 下方登录按钮占满整行 */
@@ -145,13 +146,15 @@ body {
   width: 100%; padding: 13px; background: linear-gradient(135deg, #3b6fd4 0%, #234a82 100%);
   color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
   cursor: pointer; letter-spacing: 4px; transition: .18s; box-shadow: 0 8px 18px rgba(35, 74, 130, .30);
-  margin-top: 4px;
+  margin-top: 4px; text-indent: 4px;
 }
 .login-main .primary:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(22, 40, 74, .34); }
 .login-main .primary:active { transform: translateY(0); }
-.login-card .err { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 8px; text-align: center; }
+.login-card .err { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 4px; text-align: center; }
 /* 底部注册链接 */
-.login-card .hint { color: var(--muted); font-size: 12.5px; margin-top: 16px; line-height: 1.7; text-align: center; }
+.login-card .hint { color: var(--muted); font-size: 12.5px; margin-top: 14px; line-height: 1.7; text-align: center; }
+/* 版权/访问提示行：登录与注册视图共用，填充表单底部留白 */
+.login-foot { margin: 18px 0 0; text-align: center; font-size: 11px; color: #a8b2c1; letter-spacing: .5px; }
 .login-main .link { color: var(--primary); cursor: pointer; font-weight: 600; }
 .login-main .link:hover { text-decoration: underline; }
 /* 注册视图的输入框（与登录视图共用 .login-field 图标）
