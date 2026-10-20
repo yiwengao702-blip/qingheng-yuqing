@@ -68,6 +68,16 @@ SEED_USERS: List[dict] = [
      "role": "analyst", "name": "舆情分析师"},
     {"username": "pr", "password": _resolve_seed_password("pr", "PR_PASSWORD"),
      "role": "pr", "name": "公关运营"},
+    # 演示身份：三种角色各一个固定口令账号（口令统一取 DEMO_PASSWORD，见 po.env）。
+    # 与上面的 admin/analyst/pr 分开建，是为了「演示号」与「管理号」互不影响：
+    # 演示号可以对外给、口令简单；管理号仍是随机强口令，不因为演示而被削弱。
+    # 三个演示号同口令（demo123456）是为了演示时只需记一个。
+    {"username": "demo", "password": _resolve_seed_password("demo", "DEMO_PASSWORD"),
+     "role": "admin", "name": "演示管理员"},
+    {"username": "demo_analyst", "password": _resolve_seed_password("demo_analyst", "DEMO_PASSWORD"),
+     "role": "analyst", "name": "演示分析师"},
+    {"username": "demo_pr", "password": _resolve_seed_password("demo_pr", "DEMO_PASSWORD"),
+     "role": "pr", "name": "演示公关"},
 ]
 
 # 默认通知渠道（管理员可配置）
