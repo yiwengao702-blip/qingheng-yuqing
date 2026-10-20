@@ -158,6 +158,44 @@ body {
 .login-main .primary:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(22, 40, 74, .34); }
 .login-main .primary:active { transform: translateY(0); }
 .login-card .err { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 4px; text-align: center; }
+/* 演示身份提示块：三行角色，行为「点一下填凭据」。
+   与主按钮拉开层级：浅底 + 细虚线边，不抢视觉，只作为便捷入口。 */
+.demo-tip {
+  margin-top: 10px; padding: 9px 10px;
+  background: rgba(22, 40, 74, .04);
+  border: 1px dashed rgba(22, 40, 74, .18);
+  border-radius: 10px;
+  font-size: 12px; color: var(--muted); line-height: 1.5;
+}
+.demo-tip .demo-head {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.demo-tip .demo-badge {
+  flex: none; padding: 1px 6px; border-radius: 999px;
+  background: var(--primary); color: #fff; font-size: 10.5px; letter-spacing: .5px;
+}
+/* 演示身份卡片：三角色并排，整卡可点（一键登录） */
+.demo-tip .demo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.demo-tip .demo-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  padding: 9px 10px; background: #fff; border: 1px solid rgba(22, 40, 74, .14);
+  border-radius: 9px; cursor: pointer; text-align: left; font: inherit;
+  transition: .18s var(--ease);
+}
+.demo-tip .demo-card:hover {
+  border-color: var(--primary); box-shadow: 0 8px 18px -12px rgba(29, 74, 126, .5);
+  transform: translateY(-1px);
+}
+.demo-tip .demo-role { font-size: 12px; font-weight: 700; color: #1d2735; white-space: nowrap; }
+.demo-tip .demo-acc {
+  font-size: 11px; color: var(--muted);
+  font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all;
+}
+.demo-tip .demo-enter { font-size: 11.5px; font-weight: 600; color: var(--primary); margin-top: 1px; }
+@media (max-width: 460px) { .demo-tip .demo-grid { grid-template-columns: 1fr; } }
 /* 底部注册链接 */
 .login-card .hint { color: var(--muted); font-size: 12.5px; margin-top: 14px; line-height: 1.7; text-align: center; }
 /* 版权/访问提示行：登录与注册视图共用，填充表单底部留白 */

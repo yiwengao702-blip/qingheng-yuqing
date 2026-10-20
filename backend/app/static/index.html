@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>清衡舆情分析平台</title>
-  <link rel="stylesheet" href="/css/style.css?v=20260923aw" />
-  <script src="/vendor/echarts.min.js?v=20260923aw"></script>
+  <link rel="stylesheet" href="/css/style.css?v=20261019c" />
+  <script src="/vendor/echarts.min.js?v=20261019c"></script>
 </head>
 <body>
   <!-- 登录遮罩 -->
@@ -79,6 +79,28 @@
           <label class="login-remember"><input type="checkbox" id="login-remember" /> 记住账号密码</label>
           <button id="login-btn" class="primary">登 录</button>
           <div id="login-err" class="err"></div>
+
+          <!-- 演示身份：三种角色各一个固定口令账号，点卡片直接一键登录（密码统一 demo123456） -->
+          <div class="demo-tip">
+            <div class="demo-head"><span class="demo-badge">演示</span>三种身份 · 一键登录（密码 demo123456）</div>
+            <div class="demo-grid">
+              <button type="button" class="demo-card demo-fill" data-user="demo">
+                <span class="demo-role">系统管理员</span>
+                <span class="demo-acc">demo</span>
+                <span class="demo-enter">一键登录 →</span>
+              </button>
+              <button type="button" class="demo-card demo-fill" data-user="demo_analyst">
+                <span class="demo-role">舆情分析师</span>
+                <span class="demo-acc">demo_analyst</span>
+                <span class="demo-enter">一键登录 →</span>
+              </button>
+              <button type="button" class="demo-card demo-fill" data-user="demo_pr">
+                <span class="demo-role">公关运营</span>
+                <span class="demo-acc">demo_pr</span>
+                <span class="demo-enter">一键登录 →</span>
+              </button>
+            </div>
+          </div>
 
           <div class="hint">还没有账号？<a id="to-register" class="link">立即注册</a></div>
         </div>
@@ -172,16 +194,16 @@
     </div>
   </div>
 
-  <script src="/js/api.js?v=20260923aw"></script>
-  <script src="/js/store.js?v=20260923aw"></script>
-  <script src="/js/dashboard.js?v=20260923aw"></script>
-  <script src="/js/industry_board.js?v=20260923ax"></script>
-  <script src="/js/feed.js?v=20260923aw"></script>
-  <script src="/js/event.js?v=20260923aw"></script>
-  <script src="/js/disposal.js?v=20260923aw"></script>
-  <script src="/js/report.js?v=20260923aw"></script>
-  <script src="/js/config.js?v=20260923aw"></script>
-  <script src="/js/online.js?v=20260923aw"></script>
-  <script src="/js/app.js?v=20260923ax"></script>
+  <script src="/js/api.js?v=20261019c"></script>
+  <script src="/js/store.js?v=20261019c"></script>
+  <script src="/js/dashboard.js?v=20261019c"></script>
+  <script src="/js/industry_board.js?v=20261019c"></script>
+  <script src="/js/feed.js?v=20261019c"></script>
+  <script src="/js/event.js?v=20261019c"></script>
+  <script src="/js/disposal.js?v=20261019c"></script>
+  <script src="/js/report.js?v=20261019c"></script>
+  <script src="/js/config.js?v=20261019c"></script>
+  <script src="/js/online.js?v=20261019c"></script>
+  <script src="/js/app.js?v=20261019c"></script>
 </body>
 </html>

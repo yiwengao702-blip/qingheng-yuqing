@@ -170,6 +170,16 @@ const App = (() => {
       doLogin(u, p);
     };
     document.getElementById("login-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("login-btn").click(); });
+    // 演示身份一键登录：三种角色共用密码 demo123456，点击卡片直接进入。
+    document.querySelectorAll(".demo-fill").forEach((el) => {
+      el.onclick = () => {
+        const u = el.dataset.user || "";
+        document.getElementById("login-user").value = u;
+        document.getElementById("login-pass").value = "demo123456";
+        document.getElementById("login-err").textContent = "";
+        doLogin(u, "demo123456");
+      };
+    });
     // 退出登录：先弹确认框，确认后再清会话并回到登录页
     document.getElementById("logout-btn").onclick = async () => {
       const ok = await askConfirm({ title: "退出登录", message: "确定要退出当前账号吗？退出后需重新登录。", okText: "退出登录", cancelText: "再想想" });
